@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { LoadingSpinner } from '#/components/common/LoadingSpinner'
+import { PageHeaderSkeleton, TableSkeleton } from '#/components/common/skeletons'
 import { PageHeader } from '#/components/layout/PageHeader'
 import { InviteUserDialog } from '#/views/users/InviteUserDialog'
 import { Badge } from '#/components/ui/badge'
@@ -52,7 +52,12 @@ export function UserManagementView() {
   })
 
   if (usersQuery.isLoading) {
-    return <LoadingSpinner label="Loading users…" />
+    return (
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+        <PageHeaderSkeleton />
+        <TableSkeleton rows={6} />
+      </div>
+    )
   }
 
   const users = usersQuery.data ?? []

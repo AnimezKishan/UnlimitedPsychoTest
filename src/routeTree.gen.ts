@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ExamRouteImport } from './routes/_exam'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthSetupPasswordRouteImport } from './routes/auth/setup-password'
@@ -22,8 +23,12 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AppAdminUsersRouteImport } from './routes/_app/admin/users'
 import { Route as AppTestsResultsAttemptIdRouteImport } from './routes/_app/tests/results/$attemptId'
 import { Route as AppSectionsSlugPreviewRouteImport } from './routes/_app/sections/$slug/preview'
-import { Route as AppSectionsSlugAttemptAttemptIdRouteImport } from './routes/_app/sections/$slug/attempt/$attemptId'
+import { Route as ExamSectionsSlugAttemptAttemptIdRouteImport } from './routes/_exam/sections/$slug/attempt/$attemptId'
 
+const ExamRoute = ExamRouteImport.update({
+  id: '/_exam',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
@@ -89,11 +94,11 @@ const AppSectionsSlugPreviewRoute = AppSectionsSlugPreviewRouteImport.update({
   path: '/sections/$slug/preview',
   getParentRoute: () => AppRoute,
 } as any)
-const AppSectionsSlugAttemptAttemptIdRoute =
-  AppSectionsSlugAttemptAttemptIdRouteImport.update({
+const ExamSectionsSlugAttemptAttemptIdRoute =
+  ExamSectionsSlugAttemptAttemptIdRouteImport.update({
     id: '/sections/$slug/attempt/$attemptId',
     path: '/sections/$slug/attempt/$attemptId',
-    getParentRoute: () => AppRoute,
+    getParentRoute: () => ExamRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -109,7 +114,7 @@ export interface FileRoutesByFullPath {
   '/sections/': typeof AppSectionsIndexRoute
   '/sections/$slug/preview': typeof AppSectionsSlugPreviewRoute
   '/tests/results/$attemptId': typeof AppTestsResultsAttemptIdRoute
-  '/sections/$slug/attempt/$attemptId': typeof AppSectionsSlugAttemptAttemptIdRoute
+  '/sections/$slug/attempt/$attemptId': typeof ExamSectionsSlugAttemptAttemptIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -124,12 +129,13 @@ export interface FileRoutesByTo {
   '/sections': typeof AppSectionsIndexRoute
   '/sections/$slug/preview': typeof AppSectionsSlugPreviewRoute
   '/tests/results/$attemptId': typeof AppTestsResultsAttemptIdRoute
-  '/sections/$slug/attempt/$attemptId': typeof AppSectionsSlugAttemptAttemptIdRoute
+  '/sections/$slug/attempt/$attemptId': typeof ExamSectionsSlugAttemptAttemptIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/_exam': typeof ExamRouteWithChildren
   '/_app/admin': typeof AppAdminRouteWithChildren
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -141,7 +147,7 @@ export interface FileRoutesById {
   '/_app/sections/': typeof AppSectionsIndexRoute
   '/_app/sections/$slug/preview': typeof AppSectionsSlugPreviewRoute
   '/_app/tests/results/$attemptId': typeof AppTestsResultsAttemptIdRoute
-  '/_app/sections/$slug/attempt/$attemptId': typeof AppSectionsSlugAttemptAttemptIdRoute
+  '/_exam/sections/$slug/attempt/$attemptId': typeof ExamSectionsSlugAttemptAttemptIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -178,6 +184,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/_exam'
     | '/_app/admin'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -189,12 +196,13 @@ export interface FileRouteTypes {
     | '/_app/sections/'
     | '/_app/sections/$slug/preview'
     | '/_app/tests/results/$attemptId'
-    | '/_app/sections/$slug/attempt/$attemptId'
+    | '/_exam/sections/$slug/attempt/$attemptId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  ExamRoute: typeof ExamRouteWithChildren
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
@@ -204,6 +212,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_exam': {
+      id: '/_exam'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ExamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -295,12 +310,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSectionsSlugPreviewRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/sections/$slug/attempt/$attemptId': {
-      id: '/_app/sections/$slug/attempt/$attemptId'
+    '/_exam/sections/$slug/attempt/$attemptId': {
+      id: '/_exam/sections/$slug/attempt/$attemptId'
       path: '/sections/$slug/attempt/$attemptId'
       fullPath: '/sections/$slug/attempt/$attemptId'
-      preLoaderRoute: typeof AppSectionsSlugAttemptAttemptIdRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof ExamSectionsSlugAttemptAttemptIdRouteImport
+      parentRoute: typeof ExamRoute
     }
   }
 }
@@ -323,7 +338,6 @@ interface AppRouteChildren {
   AppSectionsIndexRoute: typeof AppSectionsIndexRoute
   AppSectionsSlugPreviewRoute: typeof AppSectionsSlugPreviewRoute
   AppTestsResultsAttemptIdRoute: typeof AppTestsResultsAttemptIdRoute
-  AppSectionsSlugAttemptAttemptIdRoute: typeof AppSectionsSlugAttemptAttemptIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -332,14 +346,24 @@ const AppRouteChildren: AppRouteChildren = {
   AppSectionsIndexRoute: AppSectionsIndexRoute,
   AppSectionsSlugPreviewRoute: AppSectionsSlugPreviewRoute,
   AppTestsResultsAttemptIdRoute: AppTestsResultsAttemptIdRoute,
-  AppSectionsSlugAttemptAttemptIdRoute: AppSectionsSlugAttemptAttemptIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface ExamRouteChildren {
+  ExamSectionsSlugAttemptAttemptIdRoute: typeof ExamSectionsSlugAttemptAttemptIdRoute
+}
+
+const ExamRouteChildren: ExamRouteChildren = {
+  ExamSectionsSlugAttemptAttemptIdRoute: ExamSectionsSlugAttemptAttemptIdRoute,
+}
+
+const ExamRouteWithChildren = ExamRoute._addFileChildren(ExamRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  ExamRoute: ExamRouteWithChildren,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,

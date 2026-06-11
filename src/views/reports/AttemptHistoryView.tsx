@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { LoadingSpinner } from '#/components/common/LoadingSpinner'
 import { EmptyState } from '#/components/common/EmptyState'
+import { HistoryPageSkeleton } from '#/components/common/skeletons'
 import { PageHeader } from '#/components/layout/PageHeader'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -15,7 +15,7 @@ export function AttemptHistoryView() {
   })
 
   if (historyQuery.isLoading) {
-    return <LoadingSpinner label="Loading history…" />
+    return <HistoryPageSkeleton />
   }
 
   const attempts = historyQuery.data ?? []
