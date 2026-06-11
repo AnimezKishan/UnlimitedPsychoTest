@@ -6,7 +6,8 @@ import {
   getAttemptHistory,
   getAttemptResult,
   saveAttemptAnswer,
-  startOddNumberAttempt,
+  startExamTimer,
+  startSectionAttempt,
   submitAttempt,
 } from '#/server/services/tests-service'
 
@@ -29,7 +30,7 @@ export const startAttemptFn = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
   .validator(startAttemptSchema)
   .handler(async ({ data, context }) =>
-    startOddNumberAttempt({
+    startSectionAttempt({
       userId: context.user.id,
       sectionSlug: data.sectionSlug,
       timerMinutes: data.timerMinutes,
@@ -41,6 +42,16 @@ export const getAttemptFn = createServerFn({ method: 'GET' })
   .validator(attemptIdSchema)
   .handler(async ({ data, context }) =>
     getAttemptForUser(data.attemptId, context.user.id),
+  )
+
+export const startExamTimerFn = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
+  .validator(attemptIdSchema)
+  .handler(async ({ data, context }) =>
+    startExamTimer({
+      attemptId: data.attemptId,
+      userId: context.user.id,
+    }),
   )
 
 export const saveAnswerFn = createServerFn({ method: 'POST' })

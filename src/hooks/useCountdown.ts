@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react'
 
-export function useCountdown(expiresAt: Date | string | null, onExpire?: () => void) {
+export function useCountdown(
+  expiresAt: Date | string | null,
+  onExpire?: () => void,
+  options?: { paused?: boolean },
+) {
+  const paused = options?.paused ?? false
   const [remainingMs, setRemainingMs] = useState(() => getRemainingMs(expiresAt))
 
   useEffect(() => {
-    if (!expiresAt) {
+    if (!expiresAt || paused) {
       return
     }
 
@@ -19,7 +24,7 @@ export function useCountdown(expiresAt: Date | string | null, onExpire?: () => v
     }, 250)
 
     return () => window.clearInterval(interval)
-  }, [expiresAt, onExpire])
+  }, [expiresAt, onExpire, paused])
 
   return {
     remainingMs,

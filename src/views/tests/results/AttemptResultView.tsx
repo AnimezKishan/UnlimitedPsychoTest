@@ -1,6 +1,6 @@
 import { Link, useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { LoadingSpinner } from '#/components/common/LoadingSpinner'
+import { ResultSummarySkeleton } from '#/components/common/skeletons'
 import { PageHeader } from '#/components/layout/PageHeader'
 import { Badge } from '#/components/ui/badge'
 import { Button } from '#/components/ui/button'
@@ -16,7 +16,7 @@ export function AttemptResultView() {
   })
 
   if (resultQuery.isLoading || !resultQuery.data) {
-    return <LoadingSpinner label="Loading results…" />
+    return <ResultSummarySkeleton />
   }
 
   const attempt = resultQuery.data

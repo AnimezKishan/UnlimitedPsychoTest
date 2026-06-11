@@ -79,6 +79,7 @@ npm run typecheck          # Run TypeScript checks
 npm test                   # Run Vitest tests
 npm run db:generate        # Generate Drizzle migrations
 npm run db:push            # Push schema to the database
+npm run db:push:prod       # Push schema to the production database
 npm run db:studio          # Open Drizzle Studio
 npm run seed:super-admin   # Create/update the Super Admin account
 npm run seed:super-admin:prod -- <password> # Create/update Super Admin in production
@@ -164,7 +165,13 @@ The project is designed for deployment on platforms that can run TanStack Start 
 
 After deploying, run the database schema command for the target environment and seed the Super Admin account through a trusted server-side environment.
 
-For production seeding, ensure `.env.production` points to the production database and has `APP_ENV=production`, then run:
+For production setup, ensure `.env.production` points to the production database and has `APP_ENV=production`, then push the schema:
+
+```bash
+npm run db:push:prod
+```
+
+Then seed the production Super Admin:
 
 ```bash
 npm run seed:super-admin:prod -- <strong-password>

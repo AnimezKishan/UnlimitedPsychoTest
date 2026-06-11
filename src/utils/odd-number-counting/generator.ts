@@ -52,8 +52,8 @@ function buildOptions(correct: number, rng: () => number) {
 export function generateOddNumberQuestions(
   attemptId: string,
   questionCount = 30,
-  minDigits = 25,
-  maxDigits = 30,
+  minDigits = 45,
+  maxDigits = 50,
 ): Array<OddNumberQuestion> {
   const questions: Array<OddNumberQuestion> = []
 
