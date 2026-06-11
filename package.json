@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
+    "db:push:prod": "drizzle-kit push --config drizzle.production.config.ts",
     "db:studio": "drizzle-kit studio",
     "seed:super-admin": "tsx scripts/seed-super-admin.ts",
     "seed:super-admin:prod": "tsx scripts/seed-super-admin-prod.ts"

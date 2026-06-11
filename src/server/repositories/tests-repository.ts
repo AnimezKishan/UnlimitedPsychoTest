@@ -75,6 +75,34 @@ export async function seedAttemptAnswers(
   )
 }
 
+export async function startExamTimer(attemptId: string) {
+  const attempt = await findAttemptById(attemptId)
+
+  if (!attempt) {
+    return null
+  }
+
+  const timerAlreadyStarted = attempt.expiresAt.getTime() > attempt.startedAt.getTime() + 1000
+
+  if (timerAlreadyStarted) {
+    return attempt
+  }
+
+  const now = new Date()
+  const expiresAt = new Date(now.getTime() + attempt.timerMinutes * 60_000)
+
+  const [updated] = await db
+    .update(attempts)
+    .set({
+      startedAt: now,
+      expiresAt,
+    })
+    .where(eq(attempts.id, attemptId))
+    .returning()
+
+  return findAttemptById(updated.id)
+}
+
 export async function updateAttemptAnswer(input: {
   attemptId: string
   questionIndex: number

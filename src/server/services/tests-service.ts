@@ -1,5 +1,10 @@
-import { ODD_NUMBER_COUNTING_CONFIG } from '#/configs/test-config'
-import { generateOddNumberQuestions } from '#/utils/odd-number-counting/generator'
+import {
+  getSectionTestConfig,
+  ODD_NUMBER_COUNTING_CONFIG,
+  ODD_NUMBER_SUM_CONFIG,
+} from '#/configs/test-config'
+import { generateQuestionsForSection } from '#/utils/exam/section-questions'
+import { isExamTimerStarted } from '#/utils/exam/exam-timer-state'
 import {
   createAttempt,
   findAttemptById,
@@ -8,6 +13,7 @@ import {
   finalizeAttempt,
   scoreAttemptAnswers,
   seedAttemptAnswers,
+  startExamTimer as startExamTimerInRepository,
   updateAttemptAnswer,
   upsertSection,
 } from '#/server/repositories/tests-repository'
@@ -21,9 +27,18 @@ export async function ensureSectionsSeeded() {
     minTimerMinutes: ODD_NUMBER_COUNTING_CONFIG.minTimerMinutes,
     maxTimerMinutes: ODD_NUMBER_COUNTING_CONFIG.maxTimerMinutes,
   })
+
+  await upsertSection({
+    slug: ODD_NUMBER_SUM_CONFIG.slug,
+    name: ODD_NUMBER_SUM_CONFIG.name,
+    description: ODD_NUMBER_SUM_CONFIG.description,
+    questionCount: ODD_NUMBER_SUM_CONFIG.questionCount,
+    minTimerMinutes: ODD_NUMBER_SUM_CONFIG.minTimerMinutes,
+    maxTimerMinutes: ODD_NUMBER_SUM_CONFIG.maxTimerMinutes,
+  })
 }
 
-export async function startOddNumberAttempt(input: {
+export async function startSectionAttempt(input: {
   userId: string
   sectionSlug: string
   timerMinutes: number
@@ -31,8 +46,9 @@ export async function startOddNumberAttempt(input: {
   await ensureSectionsSeeded()
 
   const section = await findSectionBySlug(input.sectionSlug)
+  const sectionConfig = getSectionTestConfig(input.sectionSlug)
 
-  if (!section || !section.isActive) {
+  if (!section || !section.isActive || !sectionConfig) {
     throw new Error('SECTION_NOT_FOUND')
   }
 
@@ -43,7 +59,8 @@ export async function startOddNumberAttempt(input: {
     throw new Error('INVALID_TIMER')
   }
 
-  const expiresAt = new Date(Date.now() + input.timerMinutes * 60_000)
+  const startedAt = new Date()
+  const expiresAt = new Date(startedAt.getTime())
 
   const attempt = await createAttempt({
     userId: input.userId,
@@ -53,7 +70,7 @@ export async function startOddNumberAttempt(input: {
     answers: [],
   })
 
-  const questions = generateOddNumberQuestions(attempt.id)
+  const questions = generateQuestionsForSection(input.sectionSlug, attempt.id)
 
   await seedAttemptAnswers(
     attempt.id,
@@ -70,6 +87,9 @@ export async function startOddNumberAttempt(input: {
   }
 }
 
+/** @deprecated Use startSectionAttempt */
+export const startOddNumberAttempt = startSectionAttempt
+
 export async function getAttemptForUser(attemptId: string, userId: string) {
   const attempt = await findAttemptById(attemptId)
 
@@ -77,12 +97,25 @@ export async function getAttemptForUser(attemptId: string, userId: string) {
     throw new Error('ATTEMPT_NOT_FOUND')
   }
 
-  const questions =
-    attempt.section.slug === ODD_NUMBER_COUNTING_CONFIG.slug
-      ? generateOddNumberQuestions(attempt.id)
-      : []
+  const questions = generateQuestionsForSection(attempt.section.slug, attempt.id)
 
   return { attempt, questions }
+}
+
+export async function startExamTimer(input: { attemptId: string; userId: string }) {
+  const { attempt } = await getAttemptForUser(input.attemptId, input.userId)
+
+  if (attempt.status !== 'in_progress') {
+    throw new Error('ATTEMPT_CLOSED')
+  }
+
+  const updated = await startExamTimerInRepository(input.attemptId)
+
+  if (!updated) {
+    throw new Error('ATTEMPT_NOT_FOUND')
+  }
+
+  return updated
 }
 
 export async function saveAttemptAnswer(input: {
@@ -95,6 +128,10 @@ export async function saveAttemptAnswer(input: {
 
   if (attempt.status !== 'in_progress') {
     throw new Error('ATTEMPT_CLOSED')
+  }
+
+  if (!isExamTimerStarted(attempt)) {
+    throw new Error('EXAM_NOT_STARTED')
   }
 
   if (new Date() > new Date(attempt.expiresAt)) {
@@ -144,6 +181,10 @@ export async function getAttemptResult(attemptId: string, userId: string) {
   }
 
   if (attempt.status === 'in_progress') {
+    if (!isExamTimerStarted(attempt)) {
+      return attempt
+    }
+
     const isExpired = new Date() > new Date(attempt.expiresAt)
     if (isExpired) {
       return submitAttempt({ attemptId, userId, reason: 'timer' })

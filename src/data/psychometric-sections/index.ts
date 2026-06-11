@@ -1,4 +1,7 @@
-import { ODD_NUMBER_COUNTING_CONFIG } from '#/configs/test-config'
+import {
+  ODD_NUMBER_COUNTING_CONFIG,
+  ODD_NUMBER_SUM_CONFIG,
+} from '#/configs/test-config'
 
 export type SectionDefinition = {
   slug: string
@@ -21,6 +24,16 @@ export const psychometricSections: Array<SectionDefinition> = [
     maxTimerMinutes: ODD_NUMBER_COUNTING_CONFIG.maxTimerMinutes,
     difficulty: 'Foundation',
     rules: [...ODD_NUMBER_COUNTING_CONFIG.rules],
+  },
+  {
+    slug: ODD_NUMBER_SUM_CONFIG.slug,
+    name: ODD_NUMBER_SUM_CONFIG.name,
+    description: ODD_NUMBER_SUM_CONFIG.description,
+    questionCount: ODD_NUMBER_SUM_CONFIG.questionCount,
+    minTimerMinutes: ODD_NUMBER_SUM_CONFIG.minTimerMinutes,
+    maxTimerMinutes: ODD_NUMBER_SUM_CONFIG.maxTimerMinutes,
+    difficulty: 'Foundation',
+    rules: [...ODD_NUMBER_SUM_CONFIG.rules],
   },
 ]
 
